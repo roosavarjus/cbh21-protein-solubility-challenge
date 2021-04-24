@@ -7,6 +7,7 @@ import pandas as pd
 from calc_fractions import *
 from Bio.SeqUtils.IsoelectricPoint import IsoelectricPoint as IP
 from Bio.PDB.Polypeptide import PPBuilder
+from Bio.SeqUtils.ProtParam import ProteinAnalysis
 import atomium
 
 def calc_length(filenames):
@@ -126,8 +127,10 @@ def iso_point(filenames):
     """Funciton that calculats the isoelectric point of a list of proteins"""
     prot_charge = []
     pi = []
+    aromatic_count = []
+    aromaticity = []
+    weight = []
 
-    #for file in glob.glob("data/training/crystal_structs/*.pdb"):
     for file in filenames:
 
         # parse the pdb file
@@ -139,12 +142,23 @@ def iso_point(filenames):
         for pp in PolypeptideBuilder.build_peptides(s):
             query_chain = pp.get_sequence()
 
+        # calculate iso-electric point etc.
         protein = IP(query_chain)
-
         prot_charge.append(protein.charge_at_pH(7.0))
         pi.append(protein.pi())
 
-    return prot_charge, pi
+        # calculate molecular weight
+        X = ProteinAnalysis(str(query_chain))
+        # print(str(query_chain) + "\n")
+        aromatic_count.append(X.count_amino_acids()['F'] + X.count_amino_acids()['W'] + X.count_amino_acids()['Y'])
+
+        # Calculate aromaticity
+        aromaticity.append(X.aromaticity())
+
+        # molecular weight
+        weight.append(X.molecular_weight())
+
+    return prot_charge, pi, aromatic_count, aromaticity, weight
 
 
 def radius_of_giration(filenames):
@@ -165,32 +179,37 @@ def compute_features(filenames, save=False):
     protIDs = [filename.split('/')[-1].split('.pdb')[0] for filename in filenames]
     
     ###### Protein Sequence Length
-    print('Calculating Protein Sequence Length')
+    #print('Calculating Protein Sequence Length')
     prot_lengths = calc_length(filenames)
 
     ###### Surface Area
-    print("Calculating Surface Area")
+    #print("Calculating Surface Area")
     surfaces = calc_surface(filenames)
 
     ###### Relative Surface Area
-    print("Calculating Relative Surface Area")
+    #print("Calculating Relative Surface Area")
     surface_seq = [surfaces[i] / prot_lengths[i] for i in range(len(surfaces))]
 
     ###### Secondary Structure
-    print("Calculating Secondary Structure")
+    #print("Calculating Secondary Structure")
     frac_mod_beta_list, frac_mod_alfa_list, frac_exp_alfa_list = ss_depth(filenames)
 
     ###### Isoelectron point and overall charge
-    print("Calculating Isoelecric point and charge of sequence")
-    prot_charges, pis = iso_point(filenames)
-    
+    #print("Calculating Isoelecric point and charge of sequence")
+    prot_charges, pis, aromatic_counts, aromaticitys, weights = iso_point(filenames)
+
+    ###### Fraction of aromatic residues
+    frac_arom = []
+    for i in range(len(aromatic_counts)):
+        frac_arom.append(aromatic_counts[i]/prot_lengths[i])
+
     ###### Radius of gyration
     
-    print("Calculating radius of gyration")
+    # print("Calculating radius of gyration")
     radius = radius_of_giration(filenames)
 
     ###### Fractions of Negative and Positive
-    print("Calculating Fractions of Negative and Positive")
+    #print("Calculating Fractions of Negative and Positive")
     feats=feat_list(filenames)
     # turn list of tuples into tuple of lists
     frac_k_minus_r, frac_neg, frac_pos, frac_charged, pos_minus_neg, exp_score= ([a for a,b,c,d,e,f in feats],
@@ -201,10 +220,11 @@ def compute_features(filenames, save=False):
                                                                         [f for a,b,c,d,e,f in feats])
 
     # Save features in file to pass to R script
-    print("Saving features")
+    #print("Saving features")
     arr = np.column_stack((protIDs, surfaces, prot_lengths, surface_seq, frac_mod_beta_list, frac_mod_alfa_list,
                            frac_exp_alfa_list, frac_k_minus_r, frac_neg, frac_pos, frac_charged, pos_minus_neg,exp_score,
-                           prot_charges, pis, radius))
+                           prot_charges, pis, aromatic_counts, aromaticitys, weights, frac_arom))
+
 
     df = pd.DataFrame({'protIDs': protIDs, 
         'surfaces': surfaces,
@@ -220,8 +240,13 @@ def compute_features(filenames, save=False):
         'pos_minus_neg': pos_minus_neg,
         'exp_score': exp_score,
         'iso_point': pis,
-        'charge': prot_charges
+        'charge': prot_charges,
+        'aromatic_counts': aromatic_counts,
+        'aromatic_fracs': frac_arom,
+        'aromaticitys': aromaticitys,
+        'weights': weights,
         'radius': radius})
+
 
     if save:
         # np.savetxt("features.csv", arr, delimiter=",")
@@ -229,6 +254,7 @@ def compute_features(filenames, save=False):
         df.to_csv('features.csv', index=False)
         
     else: 
+        df.to_csv('features.csv', index=False)
         return df
 
 
