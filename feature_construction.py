@@ -180,6 +180,31 @@ def radius_of_giration(filenames):
     
     return rg_list
 
+
+def get_average_bfactor(files):
+    """Function that calculates the average b factor for a list of proteins"""
+    av_b_factors = []
+
+    for file in files:
+        # parse the pdb file
+        p = PDB.PDBParser(QUIET=True)
+        s = p.get_structure(file, file)
+
+        nratoms, sumbfactor = 0, 0.0
+
+        for model in s:
+            for chain in model:
+                for residue in chain:
+                    if PDB.is_aa(residue.get_resname()):
+                        for atom in residue:
+                            sumbfactor += atom.get_bfactor()
+                            nratoms += 1
+
+        avgbfactor = sumbfactor / nratoms
+        av_b_factors.append(avgbfactor)
+
+    return av_b_factors
+
 def compute_features(filenames, save=False):
     """"Takes list of pdb filenames as input and returns list of features"""
 
@@ -216,6 +241,9 @@ def compute_features(filenames, save=False):
     # print("Calculating radius of gyration")
     radius = radius_of_giration(filenames)
 
+    ##### B factor
+    bs = get_average_bfactor(filenames)
+
     ###### Fractions of Negative and Positive
     #print("Calculating Fractions of Negative and Positive")
     feats=feat_list(filenames)
@@ -231,7 +259,7 @@ def compute_features(filenames, save=False):
     #print("Saving features")
     arr = np.column_stack((protIDs, surfaces, prot_lengths, surface_seq, frac_mod_beta_list, frac_mod_alfa_list,
                            frac_exp_alfa_list, frac_k_minus_r, frac_neg, frac_pos, frac_charged, pos_minus_neg,exp_score,
-                           prot_charges, pis, aromatic_counts, aromaticitys, weights, frac_arom, instability))
+                           prot_charges, pis, aromatic_counts, aromaticitys, weights, frac_arom, instability, bs))
 
 
     df = pd.DataFrame({'protIDs': protIDs, 
@@ -254,7 +282,8 @@ def compute_features(filenames, save=False):
         'aromaticitys': aromaticitys,
         'weights': weights,
         'radius': radius,
-        'Instability': instability})
+        'instability': instability,
+        'b_factor': bs})
 
 
     if save:
