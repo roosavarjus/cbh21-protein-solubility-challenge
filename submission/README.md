@@ -24,6 +24,7 @@ Fabrizio Pucci.  In addition, we also added some new features to investigate the
 The features we investigated in described below; 
 
 * Accessible surface area in Å^2. 
+* Radius of gyration.
 * The length of the amino acid sequence. 
 * Fraction of the surface divided by sequence length. 
 * Fraction of moderatly buried beta residues. 
