@@ -254,6 +254,7 @@ def compute_features(filenames, save=False):
         df.to_csv('features.csv', index=False)
         
     else: 
+        df.to_csv('features.csv', index=False)
         return df
 
 
