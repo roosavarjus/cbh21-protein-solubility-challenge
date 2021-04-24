@@ -130,6 +130,8 @@ def iso_point(filenames):
     aromatic_count = []
     aromaticity = []
     weight = []
+    flex = []
+    inst = []
 
     for file in filenames:
 
@@ -158,7 +160,13 @@ def iso_point(filenames):
         # molecular weight
         weight.append(X.molecular_weight())
 
-    return prot_charge, pi, aromatic_count, aromaticity, weight
+        # flexibility calculated from aa. sequence
+        flex.append(X.flexibility())
+
+        # stability from aa. sequence
+        inst.append(X.instability_index())
+
+    return prot_charge, pi, aromatic_count, aromaticity, weight, flex, inst
 
 
 def radius_of_giration(filenames):
@@ -196,7 +204,7 @@ def compute_features(filenames, save=False):
 
     ###### Isoelectron point and overall charge
     #print("Calculating Isoelecric point and charge of sequence")
-    prot_charges, pis, aromatic_counts, aromaticitys, weights = iso_point(filenames)
+    prot_charges, pis, aromatic_counts, aromaticitys, weights, flexibilities, instability = iso_point(filenames)
 
     ###### Fraction of aromatic residues
     frac_arom = []
@@ -223,7 +231,7 @@ def compute_features(filenames, save=False):
     #print("Saving features")
     arr = np.column_stack((protIDs, surfaces, prot_lengths, surface_seq, frac_mod_beta_list, frac_mod_alfa_list,
                            frac_exp_alfa_list, frac_k_minus_r, frac_neg, frac_pos, frac_charged, pos_minus_neg,exp_score,
-                           prot_charges, pis, aromatic_counts, aromaticitys, weights, frac_arom))
+                           prot_charges, pis, aromatic_counts, aromaticitys, weights, frac_arom, flexibilities, instability))
 
 
     df = pd.DataFrame({'protIDs': protIDs, 
@@ -245,7 +253,9 @@ def compute_features(filenames, save=False):
         'aromatic_fracs': frac_arom,
         'aromaticitys': aromaticitys,
         'weights': weights,
-        'radius': radius})
+        'radius': radius,
+        'flexibilities': flexibilities,
+        'Instability': instability})
 
 
     if save:
