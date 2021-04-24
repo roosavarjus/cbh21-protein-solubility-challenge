@@ -42,3 +42,7 @@ charged residues.
 * Fraction of aromatic residues.
 * The aromaticity of the protein
 * Molecular weights in kDa. 
+* Radium of gyration. 
+* Instability index. 
+* Average b-factor
+
