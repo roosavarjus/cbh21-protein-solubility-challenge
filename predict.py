@@ -39,7 +39,7 @@ def predict(pdb_file: Path) -> float:
     with open('pickle_model.pkl', 'rb') as file:
         rfr = pickle.load(file)
 
-    print(pdb_file)
+    # print(pdb_file)
     features = compute_features([str(pdb_file)])
     XTest = features.iloc[:, 1:].to_numpy()
 
