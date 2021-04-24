@@ -20,6 +20,9 @@ import matplotlib.pyplot as plt
 # - number of leave nodes 
 # - depth of tree
 
+# RMSE and RMSPE
+# Pearson correlation
+
 def rmse(f, t):
     N = t.shape[0]
     rmse = np.sqrt(np.mean((t - f) ** 2))
