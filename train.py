@@ -1,12 +1,10 @@
 from feature_construction import compute_features
 from sklearn.ensemble import RandomForestRegressor
-from sklearn.model_selection import train_test_split
 import numpy as np
 import pandas as pd
 import glob
 import csv
 import pickle
-import freesasa
 
 
 # train the random forrest with training data
@@ -35,7 +33,7 @@ y = solubility.iloc[:, 1:].to_numpy()
 #     X, y, test_size=0.33, random_state=42)
 
 rfr = RandomForestRegressor(n_estimators=1000)
-rfr.fit(X, y)
+rfr.fit(X, np.ravel(y))
 # rfr_prediction = rfr.predict(XTest)
 
 # from sklearn import metrics
