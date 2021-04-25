@@ -22,10 +22,10 @@ We chose a selected amount of features from the article "SOLart: a structure-bas
 solubility and aggregation" by Qingzhen Hou1, Jean Marc Kwasigroch,  Marianne Rooman and
 Fabrizio Pucci.  In addition, we also added some new features to investigate the properties of solubility further. 
 
-The features we investigated in described below; 
+The features we investigated are described below; 
 
 * Accessible surface area in Å^2. 
-* Radius of gyration.
+* ### Radius of gyration.
 * The length of the amino acid sequence. 
 * Fraction of the surface divided by sequence length. 
 * Fraction of moderatly buried beta residues. 
@@ -45,6 +45,6 @@ charged residues.
 * The aromaticity of the protein
 * Molecular weights in kDa. 
 * Radium of gyration. 
-* Instability index. 
+* ### Instability index. 
 * Average b-factor
 
