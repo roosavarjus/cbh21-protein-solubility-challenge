@@ -46,4 +46,10 @@ The features we investigated are described below, with our new features being fo
 * Fraction of positively minus negatively
 * Charged residues.
 
+![Feature_importance](../figures/Feature_importance.png)
+
+## Our Workspace
+
 ![Workspace](../figures/2021-04-24-084229353.jpg)
+
+
