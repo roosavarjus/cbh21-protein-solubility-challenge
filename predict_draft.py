@@ -1,76 +1,63 @@
 import argparse
+import csv
 from Bio import SeqIO
 import pandas as pd
 import pickle
 import glob
+import pprint
 import temppathlib
 import zipfile
 
 from feature_construction import compute_features
 
 
+if __name__ == "__main__":
 
+    # set up argument parsing
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--infile", type=str, default="data/test.zip")
+    args = parser.parse_args()
 
+    predictions = []
+    # use a temporary directory so we don't pollute our repo
+    with temppathlib.TemporaryDirectory() as tmpdir:
+        # unzip the file with all the test PDBs
+        with zipfile.ZipFile(args.infile, "r") as zip_:
+            zip_.extractall(tmpdir.path)
 
-# set up argument parsing
-parser = argparse.ArgumentParser()
-parser.add_argument("--infile", type=str, default="data/test.zip")
-args = parser.parse_args()
+        # the following is adapted to how we build the feature construction 
 
-predictions = []
-# use a temporary directory so we don't pollute our repo
-with temppathlib.TemporaryDirectory() as tmpdir:
-    # unzip the file with all the test PDBs
-    with zipfile.ZipFile(args.infile, "r") as zip_:
-        zip_.extractall(tmpdir.path)
+        # convert the paths into a list of filename strings
+        filenames = [str(tmp) for tmp in tmpdir.path.glob("*.pdb")]
 
-    filenames = [str(tmp) for tmp in tmpdir.path.glob("*.pdb")]
-    # print(filenames)
+        # compute the features for all proteins
+        features = compute_features(filenames)
 
-    features = compute_features(filenames)
+        # Load model from file
+        with open('pickle_model.pkl', 'rb') as file:
+            rfr = pickle.load(file)
 
-# Load from file
-with open('pickle_model.pkl', 'rb') as file:
-    rfr = pickle.load(file)
+        # separate the protein names from the features
+        proteins = features['protIDs'].values
+        XTest = features.iloc[:, 1:].to_numpy()
 
+        # run the prediction on the features
+        rfr_prediction = rfr.predict(XTest)
 
-# print(features)
+    # save the predictions in a dictionary and file
+    predictions = [
+        {'protein': proteins[i], 'solubility': rfr_prediction[i]}
+        for i in range(len(proteins))
+    ]
 
-# proteins = features['protIDs'].values
-# XTest = features.iloc[:, 1:].to_numpy()
+    # save to csv file, this will be used for benchmarking
+    outpath = "predictions.csv"
+    with open(outpath, "w") as fh:
+        writer = csv.DictWriter(fh, fieldnames=["protein", "solubility"])
+        writer.writeheader()
+        writer.writerows(predictions)
 
-# rfr_prediction = rfr.predict(XTest)
+    # print predictions to screen
+    pp = pprint.PrettyPrinter(indent=4)
+    pp.pprint(predictions)
 
-# predictions = pd.DataFrame({'protein': proteins, 'solubility': rfr_prediction})
-
-# # output file, this will be used for benchmarking
-# predictions_outfile = "predictions.csv"
-
-# predictions.to_csv(predictions_outfile)
-
-
-####################################
-# garbage
-
-# # set up argument parsing (make sure these match those in config.yml)
-# parser = argparse.ArgumentParser()
-# parser.add_argument("--infile", type=str, required=True)
-# args = parser.parse_args()
-
-
-
-# # process input
-# fasta_dict = dict()
-# with open(args.infile, 'r') as fh:
-#     for record in SeqIO.parse(fh, 'fasta'):
-#         fasta_dict[record.id] = str(record.seq)
-
-# # save predictions to file
-# with open(predictions_outfile, 'w') as fh:
-#     fh.write("name,adenine_count\n")
-#     for key, value in fasta_dict.items():
-#         adenine_prediction = int(0.3 * len(value))
-#         fh.write(f"{key},{adenine_prediction}\n")
-
-# # print predictions to screen
-# print(open(predictions_outfile, 'r').read())

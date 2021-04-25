@@ -8,6 +8,7 @@ import numpy as np
 import timeit
 from sklearn import metrics
 import matplotlib.pyplot as plt
+import pickle
 
 
 ########
@@ -39,7 +40,8 @@ def rmspe(f, t):
 # iterate over training files
 filenames = glob.glob("data/training/crystal_structs/*.pdb")
 
-features = compute_features(filenames)
+# features = compute_features(filenames)
+features = pd.read_csv('features.csv')
 features = features.sort_values('protIDs').reset_index(drop=True)
 
 solubility = pd.read_csv("data/training/crystal_structs/solubility_values.csv")
@@ -73,17 +75,68 @@ print(np.array(selected_features).sum(0))
 print(features.columns[1:])
 
 df_features = pd.DataFrame({'Features': features.columns[1:], 'Selected': np.array(selected_features).sum(0)})
-df_features = df_features.sort_values('Selected')
+df_features = df_features.sort_values('Selected', ascending=False)
 plt.bar(df_features['Features'], df_features['Selected'])
-# rotate labels
+plt.xticks(rotation=30, ha='right')
+plt.tight_layout()
+plt.savefig('feature_selection.png')
 plt.show()
+
+
+
+# check feature importance in model 
+with open('pickle_model.pkl', 'rb') as file:
+    rfr = pickle.load(file)
+
+print(rfr.feature_importances_)
+df_features = pd.DataFrame({'Features': features.columns[1:], 'Selected': rfr.feature_importances_})
+df_features = df_features.sort_values('Selected', ascending=False)
+plt.bar(df_features['Features'], df_features['Selected'])
+plt.xticks(rotation=30, ha='right')
+plt.tight_layout()
+plt.savefig('feature_importance.png')
+plt.show()
+
+
+
+num_features = [3, 6, 9, 12, 15, 18]
+
+for i in range(len(num_features)):
+
+    indices = df_features[:num_features[i]].index
+    XTrain_reduced = XTrain[:, indices]
+
+    RMSE_list = []
+    RMSPE_list = []
+    times = []
+
+    for train_index, test_index in cv.split(XTrain):
+        XTrainCV, XTestCV, YTrainCV, YTestCV = XTrain_reduced[train_index], XTrain_reduced[test_index], YTrain[train_index], YTrain[test_index]
+        
+        start = timeit.default_timer()
+
+        rfr = RandomForestRegressor(n_estimators=500)
+        rfr.fit(XTrainCV, np.ravel(YTrainCV))
+
+        stop = timeit.default_timer()
+        times.append(stop - start)
+
+        rfr_prediction = rfr.predict(XTestCV)
+
+        RMSE_list.append(rmse(np.squeeze(YTestCV), rfr_prediction))
+        RMSPE_list.append(rmspe(np.squeeze(YTestCV), rfr_prediction))
+
+    print('Features', num_features[i])
+    print('Time', np.mean(times))
+    print('RMSE', np.mean(RMSE_list))
+    print('RMSPE', np.mean(RMSPE_list))
 
 
 
 #########################
 # Number of trees
 
-num_trees = [50, 100, 500, 1000, 10000]
+num_trees = [50, 100, 500, 1000, 5000]
 
 for i in range(len(num_trees)):
 
