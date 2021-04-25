@@ -14,19 +14,27 @@ Our team is from Copenhagen and we think proteins are cool 🙌.
 
 ## Project Description
 
-Our team created a Random Forest Regressor to predict protein solubility. We trained the model with a selected assortment of features and fine-tuned model parameters (number of trees, tree depth, etc). 
+Our team created a Random Forest Regressor to predict protein solubility. We trained the model with a selected assortment of features and fine-tuned model parameters (number of trees, tree depth, etc). Our final Random Forest Regressor contains 1000 trees and is fed with 21 features.
 
 
 ## Features 
 We chose a selected amount of features from the article "SOLart: a structure-based method to predict protein
 solubility and aggregation" by Qingzhen Hou1, Jean Marc Kwasigroch,  Marianne Rooman and
-Fabrizio Pucci.  In addition, we also added some new features to investigate the properties of solubility further. 
+Fabrizio Pucci.  In addition, we also added some new features to investigate the properties of solubility further. Some features are based on the amino acid sequence, while others are based on the protein structure.
 
-The features we investigated are described below; 
+The features we investigated are described below, with our new features being followed by (new):
 
 * Accessible surface area in Å^2. 
-* ### Radius of gyration.
+* Radius of gyration (new).
 * The length of the amino acid sequence. 
+* Isoelectric point (new). 
+* Charge of protein at pH 7. 
+* Count of aromatic residues.
+* Fraction of aromatic residues.
+* The aromaticity of the protein (new).
+* Molecular weights in kDa (new). 
+* Instability index (new). 
+* Average b-factor (new).
 * Fraction of the surface divided by sequence length. 
 * Fraction of moderatly buried beta residues. 
 * Fraction of moderatly buried alfa residues. 
@@ -36,15 +44,4 @@ The features we investigated are described below;
 * Fraction of positivly charged residues.  
 * Fraction of charged residues.
 * Fraction of positively minus negatively
-charged residues.
-* Score on how hydrophobic the surface is (-1 for every hydrophobic amino acid, normalised by protein size).
-* Isoelectric point. 
-* Charge of protein at pH 7. 
-* Count of aromatic residues.
-* Fraction of aromatic residues.
-* The aromaticity of the protein
-* Molecular weights in kDa. 
-* Radium of gyration. 
-* ### Instability index. 
-* Average b-factor
-
+* Charged residues.
