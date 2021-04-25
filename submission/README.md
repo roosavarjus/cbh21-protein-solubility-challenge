@@ -4,10 +4,6 @@ This is our submission for the CBH2021 hackathon.
 
 Our team is from Copenhagen and we think proteins are cool 🙌.
 
-## Project Description
-
-Our team aimed to create a model to predict protein solubility. We used a random forest and trained it with a selected assortment of features. 
-
 ## Team Members
 
     Javier Marchena
@@ -15,6 +11,11 @@ Our team aimed to create a model to predict protein solubility. We used a random
     Caroline Linnea Elin Lennartsson
     Marida Ianni-Ravn
     Henrietta Holze
+
+## Project Description
+
+Our team created a Random Forest Regressor to predict protein solubility. We trained the model with a selected assortment of features and fine-tuned model parameters (number of trees, tree depth, etc). 
+
 
 ## Features 
 We chose a selected amount of features from the article "SOLart: a structure-based method to predict protein
