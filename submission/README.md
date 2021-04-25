@@ -46,5 +46,4 @@ The features we investigated are described below, with our new features being fo
 * Fraction of positively minus negatively
 * Charged residues.
 
-
-![Workspace](https://github.com/roosavarjus/cbh21-protein-solubility-challenge/tree/main/figures/2021-04-24-084229353.jpg)
+![Workspace](../figures/2021-04-24-084229353.jpg)
